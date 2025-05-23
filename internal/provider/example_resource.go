@@ -51,6 +51,10 @@ func (r *ExampleResource) Schema(ctx context.Context, req resource.SchemaRequest
 			"configurable_attribute": schema.StringAttribute{
 				MarkdownDescription: "Example configurable attribute",
 				Optional:            true,
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"defaulted": schema.StringAttribute{
 				MarkdownDescription: "Example configurable attribute with default value",
@@ -110,6 +114,11 @@ func (r *ExampleResource) Create(ctx context.Context, req resource.CreateRequest
 	// For the purposes of this example code, hardcoding a response value to
 	// save into the Terraform state.
 	data.Id = types.StringValue("example-id")
+
+	// pretend this comes from the remote API
+	if data.ConfigurableAttribute.IsUnknown() {
+		data.ConfigurableAttribute = types.StringValue("test")
+	}
 
 	// Write logs using the tflog package
 	// Documentation: https://terraform.io/plugin/log
