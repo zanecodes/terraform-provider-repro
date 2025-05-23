@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 )
@@ -68,6 +69,23 @@ func TestAccExampleResource(t *testing.T) {
 						"scaffolding_example.test",
 						tfjsonpath.New("configurable_attribute"),
 						knownvalue.StringExact("two"),
+					),
+				},
+			},
+			// Replace testing
+			{
+				Config: `resource "scaffolding_example" "test" {}`,
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("scaffolding_example.test", plancheck.ResourceActionReplace),
+						plancheck.ExpectUnknownValue("scaffolding_example.test", tfjsonpath.New("configurable_attribute")),
+					},
+				},
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownValue(
+						"scaffolding_example.test",
+						tfjsonpath.New("configurable_attribute"),
+						knownvalue.StringExact("test"),
 					),
 				},
 			},
